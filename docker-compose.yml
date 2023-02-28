@@ -1,0 +1,35 @@
+version: '3.9'
+
+services:
+
+  tester:
+    build:
+      context: ./source/tester
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./source/tester/src:/app/src
+      - ./source/tester/nodemon.json:/app/nodemon.json
+      - /app/node_modules
+    container_name: tester
+    expose:
+      - '4001'
+    ports:
+      - '4001:4001'
+    command: npm run dev
+
+  api-server:
+    build:
+      context: ./source/api-server
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./source/api-server/src:/app/src
+      - ./source/api-server/nodemon.json:/app/nodemon.json
+      - /app/node_modules
+    container_name: api-server
+    expose:
+      - '4000'
+    ports:
+      - '4000:4000'
+    command: npm run dev    
