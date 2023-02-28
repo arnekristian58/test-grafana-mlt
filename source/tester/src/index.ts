@@ -20,8 +20,6 @@ function getApi(): string {
 
   const index = Math.floor(Math.random() * 10);
 
-  console.log(`index: ${index}`)
-
   let ret = endpoints[index].replace('<NO>', (Math.round(Math.random() * 900000) + 100000).toString());
 
   return ret;
@@ -31,17 +29,10 @@ function getApi(): string {
 
 const makeRequest = async () => {
 
-  console.log('calling api')
-
   const endpoint = getApi();
 
-  console.log(`http://api-server:4000/${endpoint}`);
-
   try {
-    console.log('Calling api');
     const response = await axios.get(`http://api-server:4000/${endpoint}`);
-    
-    console.log(response.data);
   } catch (error) {
     console.error(error);
   }    

@@ -33,3 +33,19 @@ services:
     ports:
       - '4000:4000'
     command: npm run dev    
+
+  cos-server:
+    build:
+      context: ./source/cos-server
+      dockerfile: Dockerfile
+      target: base
+    volumes:
+      - ./source/cos-server/src:/app/src
+      - ./source/cos-server/nodemon.json:/app/nodemon.json
+      - /app/node_modules
+    container_name: cos-server
+    expose:
+      - '4002'
+    ports:
+      - '4002:4002'
+    command: npm run dev    
