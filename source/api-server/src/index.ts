@@ -1,6 +1,10 @@
 import express from 'express';
 import axios from 'axios';
 
+import Tracer from './Tracer';
+
+const tracer = new Tracer();
+
 const app = express();
 
 
