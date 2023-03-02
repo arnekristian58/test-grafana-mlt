@@ -1,11 +1,15 @@
 import express from 'express';
 import axios from 'axios';
 
-import Tracer from './Tracer';
+import {traceObject, getTraceObject} from './traceing';
+import {logContent, logUtils} from './logging';
 
-const tracer = new Tracer();
+(async () => {
 
 const app = express();
+
+const tracingObj = await getTraceObject();
+const logEntry = await logUtils(tracingObj);
 
 
 app.get('/customers', async (req, res) => {
@@ -70,11 +74,12 @@ const callCos = async ( cosno: string ) => {
     console.error(error);
   }    
 
-}
-    
+}   
    
 
 
 app.listen(4000, () => {
   console.log(`server running on port 4000`);
 });
+
+})();
