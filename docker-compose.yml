@@ -55,4 +55,27 @@ services:
       - '4002'
     ports:
       - '4002:4002'
-    command: npm run dev    
+    command: npm run dev   
+
+
+  # The Grafana dashboarding server.
+  grafana:
+    image: grafana/grafana:main
+    volumes:
+      - "./grafana/definitions:/var/lib/grafana/dashboards"
+      - "./grafana/provisioning:/etc/grafana/provisioning"
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_FEATURE_TOGGLES_ENABLE=tempoApmTable traceqlEditor flameGraph topnav
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+
+    
+  # The Loki service stores logs sent to it, and takes queries from Grafana
+  # to visualise those logs.
+  loki:
+    image: grafana/loki
+    ports:
+      - "3100:3100" 
