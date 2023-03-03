@@ -17,7 +17,7 @@ class Cos {
   subCoses: number[];
 
   async run() {
-    console.log(`Running cos: ${this.cosno}`);
+    // console.log(`Running cos: ${this.cosno}`);
     await sleep(this.durationMs);
     this.subCoses.forEach(subCosno => {
       let subCos: Cos | undefined = cosList.find(({ cosno }) => cosno === subCosno); 

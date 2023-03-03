@@ -13,9 +13,7 @@ const serviceName = 'api-server';
 
 export interface traceObject {
     tracer: Tracer,
-    api: typeof api,
     propagator: (span: Span) => {},
-    statusCode: typeof SpanStatusCode
 }
 
 
@@ -62,9 +60,7 @@ export async function getTraceObject(): Promise<traceObject> {
 
     return {
         tracer: api.trace.getTracer(serviceName),
-        api: api,
-        propagator: createPropagationHeader,   
-        statusCode: SpanStatusCode     
+        propagator: createPropagationHeader   
     }
 
 }

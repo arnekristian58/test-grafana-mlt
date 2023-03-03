@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { SpanStatusCode } from '@opentelemetry/api';
 import {traceObject} from './traceing';
 
 
@@ -15,7 +16,7 @@ export interface logContent {
 
 export async function logUtils(tracingObj: traceObject): Promise<(details: logContent)=>{}> {
 
-    const { api, tracer, statusCode } = tracingObj;
+    const { tracer } = tracingObj;
 
     const toLokiServer = async (details: logContent) => {
         const { message, level, job, endpointLabel, endpoint, namespace } = details;
@@ -72,7 +73,7 @@ export async function logUtils(tracingObj: traceObject): Promise<(details: logCo
 
         // * Context = api-server *
         // Set the status code as OK and end the span
-        logSpan.setStatus({ code: (!error) ? statusCode.OK : statusCode.ERROR });
+        logSpan.setStatus({ code: (!error) ? SpanStatusCode.OK : SpanStatusCode.ERROR });
         logSpan.end();
         
     };
