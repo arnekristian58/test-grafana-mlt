@@ -8,6 +8,7 @@ export interface logContent {
     namespace: string,
     job: string,
     endpointLabel: string,
+    duration: number,
     endpoint: string,
     message: string
 }
@@ -19,14 +20,15 @@ export async function logUtils(tracingObj: traceObject): Promise<(details: logCo
     const { tracer } = tracingObj;
 
     const toLokiServer = async (details: logContent) => {
-        const { message, level, job, endpointLabel, endpoint, namespace } = details;
+        const { message, level, job, endpointLabel, endpoint, namespace, duration } = details;
         let error = false;
         let stream = {
             service_name: 'api-server',
             level,
             job,
             namespace,
-            endpoint
+            endpoint,
+            duration: `${duration}`
         };
 
         try {

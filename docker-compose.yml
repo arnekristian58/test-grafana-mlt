@@ -1,6 +1,21 @@
 version: '3.9'
 
 services:
+  # Grafana agent batches and processes traces sent to it, generating metrics
+  # and auto-logs from those traces.
+  agent:
+    image: grafana/agent:latest
+    ports:
+      - "12347:12345"
+      - "12348:12348"
+      - "6832:6832"
+      - "55679:55679"
+    volumes:
+      - "./agent/config.yaml:/etc/agent/agent.yaml"
+    command: [
+      "-config.file=/etc/agent/agent.yaml",
+      "-server.http.address=0.0.0.0:12345",
+    ]
 
   tester:
     build:
@@ -64,6 +79,7 @@ services:
     volumes:
       - "./grafana/definitions:/var/lib/grafana/dashboards"
       - "./grafana/provisioning:/etc/grafana/provisioning"
+      - grafana-data:/var/lib/grafana
     ports:
       - "3000:3000"
     environment:
@@ -79,3 +95,31 @@ services:
     image: grafana/loki
     ports:
       - "3100:3100" 
+    volumes:
+      - "./loki/loki.yaml:/etc/mimir.yaml"           
+
+  mimir:
+    image: grafana/mimir:latest
+    command: ["-config.file=/etc/mimir.yaml"]
+    ports:
+      - "9009:9009"
+    volumes:
+      - "./mimir/mimir.yaml:/etc/mimir.yaml"     
+
+  minio:
+    image: minio/minio
+    entrypoint: [""]
+    command: ["sh", "-c", "mkdir -p /data/mimir && minio server --quiet /data"]
+    environment:
+      - MINIO_ROOT_USER=mimir
+      - MINIO_ROOT_PASSWORD=supersecret   
+    ports:
+      - "9000:9000"       
+      - "9001:9001"      
+    volumes:
+      - minio-storage:/data  
+    command: minio server --console-address ":9001" /data && MINIO_PROMETHEUS_AUTH_TYPE="public" minio server ~/test          
+
+volumes:
+  grafana-data: 
+  minio-storage: {}

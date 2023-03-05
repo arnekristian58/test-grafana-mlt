@@ -91,14 +91,16 @@ const callCos = async ( cosno: string, endpoint: string ) => {
     console.error(error);
   }    
   
+  let duration = Date.now() - start;
 
   logEntry({
     level: 'info',
     namespace: process.env.NAMESPACE as string,
     job: `api-server`,
     endpointLabel: 'spantag',
+    duration: duration,
     endpoint,
-    message: `traceID=${traceId} http.method=GET endpoint=${endpoint} duration=${Date.now() - start}ms`,
+    message: `traceID=${traceId} http.method=GET endpoint=${endpoint} duration=${duration}ms`,
   });
 
   requestSpan.setStatus({ code: SpanStatusCode.OK });
