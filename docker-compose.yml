@@ -22,6 +22,8 @@ services:
       context: ./source/tester
       dockerfile: Dockerfile
       target: base
+    depends_on:
+      - api-server     
     volumes:
       - ./source/tester/src:/app/src
       - ./source/tester/nodemon.json:/app/nodemon.json
@@ -38,6 +40,8 @@ services:
       context: ./source/api-server
       dockerfile: Dockerfile
       target: base
+    depends_on:
+      - loki         
     volumes:
       - ./source/api-server/src:/app/src
       - ./source/api-server/nodemon.json:/app/nodemon.json
@@ -61,6 +65,8 @@ services:
       context: ./source/cos-server
       dockerfile: Dockerfile
       target: base
+    depends_on:
+      - api-server      
     volumes:
       - ./source/cos-server/src:/app/src
       - ./source/cos-server/nodemon.json:/app/nodemon.json
@@ -77,29 +83,34 @@ services:
   grafana:
     image: grafana/grafana:main
     volumes:
-      - "./grafana/definitions:/var/lib/grafana/dashboards"
-      - "./grafana/provisioning:/etc/grafana/provisioning"
-      - grafana-data:/var/lib/grafana
+  #    - "./grafana/definitions:/var/lib/grafana/dashboards"
+  #    - "./grafana/provisioning:/etc/grafana/provisioning"
+      - "./grafana:/var/lib/grafana"
     ports:
       - "3000:3000"
-    environment:
-      - GF_FEATURE_TOGGLES_ENABLE=tempoApmTable traceqlEditor flameGraph topnav
-      - GF_AUTH_ANONYMOUS_ENABLED=true
-      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
-      - GF_AUTH_DISABLE_LOGIN_FORM=true
+#    environment:
+#      - GF_FEATURE_TOGGLES_ENABLE=tempoApmTable traceqlEditor flameGraph topnav
+#      - GF_AUTH_ANONYMOUS_ENABLED=true
+#      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+#      - GF_AUTH_DISABLE_LOGIN_FORM=true
 
     
   # The Loki service stores logs sent to it, and takes queries from Grafana
   # to visualise those logs.
   loki:
     image: grafana/loki
+    depends_on:
+      - createbuckets      
+    command: ["-config.file=/etc/loki.yaml"]    
     ports:
       - "3100:3100" 
     volumes:
-      - "./loki/loki.yaml:/etc/mimir.yaml"           
+      - "./loki/loki.yaml:/etc/loki.yaml"           
 
   mimir:
     image: grafana/mimir:latest
+    depends_on:
+      - createbuckets      
     command: ["-config.file=/etc/mimir.yaml"]
     ports:
       - "9009:9009"
@@ -108,17 +119,33 @@ services:
 
   minio:
     image: minio/minio
-    entrypoint: [""]
-    command: ["sh", "-c", "mkdir -p /data/mimir && minio server --quiet /data"]
     environment:
       - MINIO_ROOT_USER=mimir
       - MINIO_ROOT_PASSWORD=supersecret   
+      - MINIO_PROMETHEUS_AUTH_TYPE=public       
     ports:
       - "9000:9000"       
       - "9001:9001"      
     volumes:
       - minio-storage:/data  
-    command: minio server --console-address ":9001" /data && MINIO_PROMETHEUS_AUTH_TYPE="public" minio server ~/test          
+    command: server ~ --address ':9000' --console-address ':9001'   
+
+  createbuckets:
+    image: minio/mc
+    depends_on:
+      - minio
+    entrypoint: >
+      /bin/sh -c "
+      /usr/bin/mc config host add myminio http://minio:9000 mimir supersecret;
+      /usr/bin/mc rm -r --force myminio/loki;
+      /usr/bin/mc mb myminio/loki;
+      /usr/bin/mc policy set public myminio/loki;
+      /usr/bin/mc rm -r --force myminio/mimir;
+      /usr/bin/mc mb myminio/mimir;
+      /usr/bin/mc policy set public myminio/mimir;      
+      exit 0;
+      "
+
 
 volumes:
   grafana-data: 
