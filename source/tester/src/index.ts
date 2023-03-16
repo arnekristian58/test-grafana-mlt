@@ -49,10 +49,18 @@ const makeRequest = async () => {
 (async () => {
 
   // Kick off four requests that cycle at regular intervals
+  setTimeout(() => makeRequest(), 3000);
+  setTimeout(() => makeRequest(), 3500);
+  setTimeout(() => makeRequest(), 4000);
+  setTimeout(() => makeRequest(), 4500);
   setTimeout(() => makeRequest(), 5000);
+  setTimeout(() => makeRequest(), 5500);
   setTimeout(() => makeRequest(), 6000);
+  setTimeout(() => makeRequest(), 6500);
   setTimeout(() => makeRequest(), 7000);
+  setTimeout(() => makeRequest(), 7500);
   setTimeout(() => makeRequest(), 8000);
+  setTimeout(() => makeRequest(), 8500);
 
  
 })();
